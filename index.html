@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titipin SMANSEV - Jastip Sekolah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Space Grotesk', 'sans-serif'] },
+                    colors: {
+                        'neo-yellow': '#FFDE00',
+                        'neo-pink': '#FF69B4',
+                        'neo-blue': '#00BFFF',
+                        'neo-black': '#1a1a1a',
+                        'neo-green': '#00FF66',
+                    },
+                    boxShadow: { 'neo': '4px 4px 0px 0px #000000', 'neo-lg': '8px 8px 0px 0px #000000' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #fdfbf7; background-image: radial-gradient(#000 1px, transparent 1px); background-size: 24px 24px; overflow-x: hidden; }
+        .neo-box { border: 3px solid black; box-shadow: 4px 4px 0px 0px #000; background: white; }
+        .neo-btn { border: 3px solid black; box-shadow: 4px 4px 0px 0px #000; font-weight: 700; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-transform: uppercase; cursor: pointer; }
+        .neo-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px 0px #000; }
+        .neo-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px 0px #000; }
+        .neo-input { border: 3px solid black; padding: 12px; width: 100%; outline: none; font-weight: 500; background: white; border-radius: 0; appearance: none; transition: all 0.2s; }
+        .neo-input:focus { box-shadow: 4px 4px 0px 0px #000; background: #fffdf0; }
+        
+        .fade-in-up { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .cat-btn { transition: all 0.2s; border: 2px solid black; font-weight: bold; font-size: 11px; padding: 6px 12px; text-transform: uppercase; background: white; }
+        .cat-btn.active { background-color: #000; color: #fff; box-shadow: 3px 3px 0px #FF69B4; }
+        
+        .custom-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none; }
+        .hidden { display: none !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="text-neo-black min-h-screen pb-20">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="custom-toast hidden">
+        <div class="neo-box bg-neo-green px-6 py-3 font-bold flex items-center gap-3 shadow-neo">
+            <i class="fa-solid fa-check-circle"></i>
+            <span id="toast-msg">Notifikasi</span>
+        </div>
+    </div>
+
+    <!-- Navigasi -->
+    <nav class="fixed top-0 w-full z-50 bg-white border-b-4 border-black px-4 py-3 flex justify-between items-center shadow-neo">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="app.router('home')">
+            <div class="bg-neo-yellow w-9 h-9 border-2 border-black flex items-center justify-center font-bold text-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">S</div>
+            <h1 class="text-xl font-bold tracking-tighter uppercase">SMAN<span class="text-neo-pink">SEV</span></h1>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="app.router('cart')" class="relative neo-btn bg-neo-blue p-2.5 text-sm rounded-none">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-neo-pink text-white text-[10px] border-2 border-black font-bold px-1.5 py-0.5 hidden">0</span>
+            </button>
+            <button onclick="app.router('admin-login')" class="neo-btn bg-white p-2.5 text-sm rounded-none">
+                <i class="fa-solid fa-user-gear"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 mt-24 max-w-lg">
+        
+        <!-- View: Home -->
+        <div id="view-home" class="view-section fade-in-up">
+            <header class="mb-8 relative">
+                <div class="neo-box bg-neo-yellow p-6 rotate-1 relative z-10">
+                    <span class="bg-neo-pink text-white text-[10px] font-bold px-2 py-1 border-2 border-black absolute -top-3 -left-2 -rotate-12 uppercase">Trending SMANSEV</span>
+                    <h2 class="text-3xl font-bold mb-2 leading-none uppercase">Titipin di SMANSEV</h2>
+                    <p class="font-medium mb-5 text-sm leading-relaxed">Gas titipin apapun barang dan makananmu ke kita! Aman, Ready COD SMANSEV, dan fee nya pelajarable!</p>
+                    <button onclick="app.router('sell')" class="neo-btn bg-white text-black px-6 py-3 text-lg w-full flex justify-between items-center group">
+                        <span>MAU TITIP JUALAN</span>
+                        <i class="fa-solid fa-rocket group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+                <div class="absolute inset-0 bg-neo-pink translate-x-2 translate-y-2 -rotate-1 border-4 border-black"></div>
+            </header>
+
+            <!-- Kategori -->
+            <div class="flex gap-2 overflow-x-auto pb-4 no-scrollbar mb-2">
+                <button onclick="app.setCategory('Semua')" class="cat-btn active whitespace-nowrap" data-cat="Semua">Semua</button>
+                <button onclick="app.setCategory('Makanan')" class="cat-btn whitespace-nowrap" data-cat="Makanan">🍱 Makanan</button>
+                <button onclick="app.setCategory('Preloved')" class="cat-btn whitespace-nowrap" data-cat="Preloved">👕 Preloved</button>
+                <button onclick="app.setCategory('Stationery')" class="cat-btn whitespace-nowrap" data-cat="Stationery">✏️ Stationery</button>
+                <button onclick="app.setCategory('Lainnya')" class="cat-btn whitespace-nowrap" data-cat="Lainnya">📦 Lainnya</button>
+            </div>
+
+            <div class="relative mb-6">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 opacity-40"></i>
+                <input type="text" id="search-input" placeholder="Lagi nyari apa..." class="neo-input pl-12" onkeyup="app.renderProducts()">
+            </div>
+
+            <div id="product-list" class="grid grid-cols-2 gap-4 pb-10">
+                <div class="col-span-2 text-center py-10"><div class="loader mx-auto"></div></div>
+            </div>
+        </div>
+
+        <!-- View: Sell Form -->
+        <div id="view-sell" class="view-section hidden fade-in-up">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold bg-neo-blue px-2 border-2 border-black shadow-neo uppercase">Buka Lapak</h2>
+                <button onclick="app.router('home')" class="text-sm font-bold bg-gray-200 px-2 border-2 border-black">BATAL</button>
+            </div>
+            <form id="form-sell" onsubmit="app.handleSellStep1(event)" class="space-y-4">
+                <div class="neo-box p-4 bg-white space-y-4">
+                    <p class="text-[10px] font-bold uppercase border-b-2 border-black pb-1">Identitas Penjual</p>
+                    <input type="text" name="sellerName" required class="neo-input" placeholder="Nama Lengkap">
+                    <input type="tel" name="sellerWa" required class="neo-input" placeholder="WhatsApp Aktif">
+                </div>
+                <div class="neo-box p-4 bg-neo-yellow/20 space-y-4">
+                    <p class="text-[10px] font-bold uppercase border-b-2 border-black pb-1">Detail Barang</p>
+                    <select name="itemCategory" required class="neo-input">
+                        <option value="" disabled selected>Pilih Kategori</option>
+                        <option value="Makanan">Makanan</option>
+                        <option value="Preloved">Preloved</option>
+                        <option value="Stationery">Stationery</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                    <input type="text" name="itemName" required class="neo-input" placeholder="Nama Barang">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" name="itemPrice" required class="neo-input" placeholder="Harga Satuan">
+                        <input type="number" name="itemStock" required class="neo-input" placeholder="Stok">
+                    </div>
+                    <label class="block text-[10px] font-bold uppercase mb-1">Foto Barang:</label>
+                    <input type="file" id="itemImage" accept="image/*" required class="neo-input bg-white text-xs">
+                </div>
+                <button type="submit" class="neo-btn bg-neo-pink text-white w-full py-4 text-xl mt-4">LANJUT PEMBAYARAN</button>
+            </form>
+        </div>
+
+        <!-- View: Payment -->
+        <div id="view-sell-payment" class="view-section hidden fade-in-up">
+            <div class="neo-box p-6 text-center">
+                <h2 class="text-2xl font-bold mb-1 uppercase">Satu Langkah Lagi!</h2>
+                <p class="text-sm mb-6 opacity-70">Bayar biaya jastip <span class="font-bold underline">Rp3.000</span></p>
+                <div class="border-4 border-black p-3 bg-white inline-block mb-6 shadow-neo-lg">
+                    <img id="display-qris" src="https://via.placeholder.com/300?text=SCAN+DISINI" alt="QRIS" class="w-56 h-56 object-contain">
+                </div>
+                <div class="bg-neo-black text-white p-4 border-2 border-black mb-6 text-left relative overflow-hidden">
+                    <p class="text-[10px] font-bold opacity-70 uppercase mb-1">KODE KONFIRMASI (WAJIB):</p>
+                    <p id="transfer-note" class="text-neo-yellow font-bold text-2xl tracking-widest break-all"></p>
+                </div>
+                <button id="btn-submit-product" onclick="app.submitProductToDb()" class="neo-btn bg-neo-green text-black w-full py-4 mb-3 text-lg">KONFIRMASI PEMBAYARAN</button>
+            </div>
+        </div>
+
+        <!-- View: Cart -->
+        <div id="view-cart" class="view-section hidden fade-in-up">
+            <h2 class="text-2xl font-bold bg-neo-yellow px-2 border-2 border-black inline-block mb-6 uppercase shadow-neo">Keranjang</h2>
+            <div id="cart-items" class="space-y-4 mb-8"></div>
+            
+            <div id="cart-summary" class="hidden">
+                <div class="neo-box p-4 bg-neo-blue mb-8 font-bold flex justify-between items-center text-lg">
+                    <span>Total:</span> <span id="cart-total" class="text-2xl"></span>
+                </div>
+                
+                <form id="form-checkout" onsubmit="app.handleCheckout(event)" class="space-y-5">
+                    <div class="neo-box p-5 bg-white border-neo-pink border-4">
+                        <h3 class="font-bold text-sm mb-4 border-b-2 border-black pb-2 uppercase"><i class="fa-solid fa-truck-fast mr-2"></i>Pengantaran</h3>
+                        
+                        <div class="space-y-4">
+                            <input type="text" name="buyerName" required class="neo-input" placeholder="Nama Kamu">
+                            <select name="buyerClass" required class="neo-input">
+                                <option value="" disabled selected>Pilih Kelas</option>
+                                <optgroup label="Kelas 10">
+                                    <option>10-1</option><option>10-2</option><option>10-3</option><option>10-4</option><option>10-5</option><option>10-6</option>
+                                    <option>10-7</option><option>10-8</option><option>10-9</option><option>10-10</option><option>10-11</option><option>10-12</option>
+                                </optgroup>
+                                <optgroup label="Kelas 11">
+                                    <option>11-1</option><option>11-2</option><option>11-3</option><option>11-4</option><option>11-5</option>
+                                    <option>11-6</option><option>11-7</option><option>11-8</option><option>11-9</option><option>11-10</option>
+                                </optgroup>
+                                <optgroup label="Kelas 12">
+                                    <option>12-1</option><option>12-2</option><option>12-3</option><option>12-4</option><option>12-5</option>
+                                    <option>12-6</option><option>12-7</option><option>12-8</option><option>12-9</option><option>12-10</option>
+                                </optgroup>
+                                <optgroup label="Lainnya">
+                                    <option>Guru</option><option>Staff</option>
+                                </optgroup>
+                            </select>
+                            <input type="tel" name="buyerWa" required class="neo-input" placeholder="WhatsApp Kamu">
+                            
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold uppercase block">Lokasi COD:</label>
+                                <select name="codLocation" id="codLocation" onchange="app.toggleCustomLoc(this.value)" required class="neo-input">
+                                    <option value="Patung Naga">Patung Naga</option>
+                                    <option value="Taman Bhinneka">Taman Bhinneka</option>
+                                    <option value="custom">Tentukan Sendiri...</option>
+                                </select>
+                                <input type="text" id="customLoc" name="customLoc" class="neo-input hidden" placeholder="Lokasi spesifik">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold uppercase block">Waktu Antar:</label>
+                                <select name="codTimeMode" id="codTimeMode" onchange="app.toggleCustomTime(this.value)" required class="neo-input">
+                                    <option value="Istirahat 1">Istirahat 1</option>
+                                    <option value="Istirahat 2">Istirahat 2</option>
+                                    <option value="Pulang Sekolah">Pulang Sekolah</option>
+                                    <option value="custom">Pilih Jam Sendiri...</option>
+                                </select>
+                                <input type="time" id="customTime" name="customTime" class="neo-input hidden">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" id="btn-order" class="neo-btn bg-neo-pink text-white w-full py-5 text-xl">ORDER SEKARANG!</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin View -->
+        <div id="view-admin-login" class="view-section hidden fade-in-up">
+            <div class="neo-box p-8 bg-neo-black text-white text-center">
+                <h2 class="text-2xl font-bold mb-4 uppercase">Admin Area</h2>
+                <input type="password" id="admin-pass" class="neo-input text-black mb-4 text-center" placeholder="PASSWORD">
+                <button onclick="app.checkAdmin()" class="neo-btn bg-neo-yellow text-black w-full py-4">LOGIN</button>
+            </div>
+        </div>
+
+        <div id="view-admin" class="view-section hidden fade-in-up">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold bg-neo-black text-white px-3 py-1 uppercase">Dashboard</h2>
+                <button onclick="app.router('home')" class="text-xs font-bold border-2 border-black px-2 py-1 bg-white">LOGOUT</button>
+            </div>
+
+            <div class="flex border-b-4 border-black mb-6 text-[10px] overflow-x-auto whitespace-nowrap">
+                <button onclick="app.setAdminTab('pending')" id="tab-pending" class="flex-1 px-3 py-3 font-bold bg-neo-yellow border-r-2 border-black">VERIFIKASI</button>
+                <button onclick="app.setAdminTab('orders')" id="tab-orders" class="flex-1 px-3 py-3 font-bold bg-white border-r-2 border-black">PESANAN</button>
+                <button onclick="app.setAdminTab('config')" id="tab-config" class="flex-1 px-3 py-3 font-bold bg-white">SET QRIS</button>
+            </div>
+
+            <div id="admin-section-pending" class="space-y-3"></div>
+            <div id="admin-section-orders" class="hidden space-y-3"></div>
+            <div id="admin-section-config" class="hidden">
+                <div class="neo-box p-5 bg-white">
+                    <h3 class="font-bold text-sm uppercase mb-4">Update QRIS Jastip</h3>
+                    <input type="file" id="qris-upload" accept="image/*" class="neo-input mb-4 text-xs">
+                    <button onclick="app.updateQris()" class="neo-btn bg-neo-blue w-full py-3">SIMPAN & UPDATE</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(window.__firebase_config || '{}');
+        const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'smansev-titipin-app';
+        const appFirebase = initializeApp(firebaseConfig);
+        const auth = getAuth(appFirebase);
+        const db = getFirestore(appFirebase);
+
+        const PATH_PRODUCTS = `artifacts/${appId}/public/data/products`;
+        const PATH_ORDERS = `artifacts/${appId}/public/data/orders`;
+        const PATH_CONFIG = `artifacts/${appId}/public/data/config`;
+
+        window.appState = { cart: [], products: [], user: null, activeCategory: 'Semua' };
+
+        async function init() {
+            if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
+                await signInWithCustomToken(auth, window.__initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+            onAuthStateChanged(auth, (user) => { 
+                window.appState.user = user;
+                if (user) { loadConfig(); app.renderProducts(); }
+            });
+        }
+
+        async function loadConfig() {
+            try {
+                const cfg = await getDoc(doc(db, PATH_CONFIG, 'settings'));
+                if (cfg.exists()) { 
+                    const url = cfg.data().qrisUrl;
+                    if (url) document.getElementById('display-qris').src = url;
+                }
+            } catch (e) {}
+        }
+
+        window.app = {
+            router: (v) => {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                const view = document.getElementById(`view-${v}`);
+                if (view) view.classList.remove('hidden');
+                window.scrollTo(0,0);
+                if (v === 'admin') app.loadAdminData();
+                if (v === 'cart') app.renderCart();
+            },
+
+            showToast: (msg) => {
+                const t = document.getElementById('toast');
+                const m = document.getElementById('toast-msg');
+                m.innerText = msg;
+                t.classList.remove('hidden');
+                setTimeout(() => t.classList.add('hidden'), 3000);
+            },
+
+            setCategory: (cat) => {
+                window.appState.activeCategory = cat;
+                document.querySelectorAll('.cat-btn').forEach(b => {
+                    b.classList.remove('active');
+                    if (b.getAttribute('data-cat') === cat) b.classList.add('active');
+                });
+                app.renderProducts();
+            },
+
+            setAdminTab: (tab) => {
+                const tabs = ['pending', 'orders', 'config'];
+                tabs.forEach(t => {
+                    const sec = document.getElementById(`admin-section-${t}`);
+                    const btn = document.getElementById(`tab-${t}`);
+                    if (sec) sec.classList.add('hidden');
+                    if (btn) btn.classList.replace('bg-neo-yellow', 'bg-white');
+                });
+                
+                const targetSec = document.getElementById(`admin-section-${tab}`);
+                const targetBtn = document.getElementById(`tab-${tab}`);
+                if (targetSec) targetSec.classList.remove('hidden');
+                if (targetBtn) targetBtn.classList.replace('bg-white', 'bg-neo-yellow');
+            },
+
+            toggleCustomLoc: (val) => {
+                document.getElementById('customLoc').classList.toggle('hidden', val !== 'custom');
+            },
+
+            toggleCustomTime: (val) => {
+                document.getElementById('customTime').classList.toggle('hidden', val !== 'custom');
+            },
+
+            renderProducts: async () => {
+                const cont = document.getElementById('product-list');
+                const search = document.getElementById('search-input').value.toLowerCase();
+                try {
+                    const snap = await getDocs(collection(db, PATH_PRODUCTS));
+                    window.appState.products = [];
+                    snap.forEach(d => window.appState.products.push({ id: d.id, ...d.data() }));
+                    
+                    const filtered = window.appState.products.filter(p => {
+                        const matchSearch = p.itemName.toLowerCase().includes(search);
+                        const matchCat = window.appState.activeCategory === 'Semua' || p.itemCategory === window.appState.activeCategory;
+                        return p.status === 'approved' && matchSearch && matchCat;
+                    });
+
+                    cont.innerHTML = filtered.length ? '' : '<p class="col-span-2 text-center py-20 font-bold opacity-30">BELUM ADA BARANG NIH!</p>';
+                    filtered.forEach(p => {
+                        cont.innerHTML += `
+                            <div class="neo-box flex flex-col h-full bg-white animate-pop">
+                                <div class="h-36 sm:h-44 border-b-2 border-black relative">
+                                    <img src="${p.imageBase64}" class="w-full h-full object-cover">
+                                    <div class="absolute top-1 left-1 bg-white border border-black px-1 text-[7px] font-bold uppercase truncate max-w-[80%]">${p.sellerName}</div>
+                                </div>
+                                <div class="p-3 flex-grow flex flex-col justify-between">
+                                    <h3 class="font-bold text-[11px] uppercase truncate">${p.itemName}</h3>
+                                    <p class="text-neo-pink font-black text-xs mt-1">Rp${parseInt(p.itemPrice).toLocaleString()}</p>
+                                    <button onclick="app.addToCart('${p.id}')" class="neo-btn bg-neo-yellow w-full text-[9px] py-2 mt-2">TITIP BELI</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } catch (e) {}
+            },
+
+            handleSellStep1: (e) => {
+                e.preventDefault();
+                const f = e.target;
+                const file = document.getElementById('itemImage').files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    window.appState.tempProduct = {
+                        sellerName: f.sellerName.value, sellerWa: f.sellerWa.value,
+                        itemName: f.itemName.value, itemPrice: f.itemPrice.value,
+                        itemStock: f.itemStock.value, itemCategory: f.itemCategory.value,
+                        imageBase64: reader.result, status: 'pending', createdAt: new Date().toISOString(),
+                        transferCode: 'S7-' + Math.floor(1000 + Math.random() * 9000)
+                    };
+                    document.getElementById('transfer-note').innerText = window.appState.tempProduct.transferCode;
+                    app.router('sell-payment');
+                };
+                reader.readAsDataURL(file);
+            },
+
+            submitProductToDb: async () => {
+                try {
+                    await addDoc(collection(db, PATH_PRODUCTS), window.appState.tempProduct);
+                    app.showToast("Lapak terkirim! Menunggu verifikasi.");
+                    app.router('home');
+                } catch (e) { alert("Error!"); }
+            },
+
+            updateQris: async () => {
+                const file = document.getElementById('qris-upload').files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    await setDoc(doc(db, PATH_CONFIG, 'settings'), { qrisUrl: reader.result }, { merge: true });
+                    app.showToast("Gambar QRIS Berhasil Diperbarui!");
+                    document.getElementById('display-qris').src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            },
+
+            loadAdminData: async () => {
+                const sections = { pending: document.getElementById('admin-section-pending'), orders: document.getElementById('admin-section-orders') };
+                sections.pending.innerHTML = '<div class="loader mx-auto"></div>';
+                try {
+                    const pSnap = await getDocs(collection(db, PATH_PRODUCTS));
+                    const oSnap = await getDocs(collection(db, PATH_ORDERS));
+                    sections.pending.innerHTML = ''; sections.orders.innerHTML = '';
+                    
+                    pSnap.forEach(ds => {
+                        const d = ds.data();
+                        if (d.status === 'pending') {
+                            sections.pending.innerHTML += `
+                                <div class="neo-box p-3 bg-white border-neo-pink">
+                                    <p class="font-bold text-xs uppercase">${d.itemName}</p>
+                                    <p class="text-[9px] opacity-60">Penjual: ${d.sellerName} | KODE: ${d.transferCode}</p>
+                                    <div class="flex gap-2 mt-2">
+                                        <button onclick="app.verifyProduct('${ds.id}', 'approved')" class="bg-neo-green px-3 py-1 border-2 border-black font-bold text-[9px]">ACC</button>
+                                        <button onclick="app.verifyProduct('${ds.id}', 'rejected')" class="bg-red-400 px-3 py-1 border-2 border-black font-bold text-[9px]">HAPUS</button>
+                                    </div>
+                                </div>`;
+                        }
+                    });
+
+                    oSnap.forEach(ds => {
+                        const o = ds.data();
+                        const time = o.codTimeMode === 'custom' ? o.customTime : o.codTimeMode;
+                        sections.orders.innerHTML += `
+                            <div class="neo-box p-3 bg-white">
+                                <p class="font-black text-xs uppercase">${o.buyerName} (${o.buyerClass})</p>
+                                <p class="text-[10px] mt-1 italic">${o.items.map(i => i.itemName).join(', ')}</p>
+                                <p class="text-[9px] mt-2 font-bold"><i class="fa-solid fa-clock"></i> ${time} | <i class="fa-solid fa-location-dot"></i> ${o.codLocation === 'custom' ? o.customLoc : o.codLocation}</p>
+                                <div class="grid grid-cols-2 gap-2 mt-3">
+                                    <a href="https://wa.me/${o.buyerWa.replace(/\D/g,'')}" class="text-center bg-neo-black text-white text-[9px] py-1 border border-black font-bold">CHAT</a>
+                                    <button onclick="app.deleteOrder('${ds.id}')" class="bg-white text-neo-pink text-[9px] py-1 border border-black font-bold">SELESAI</button>
+                                </div>
+                            </div>`;
+                    });
+                } catch (e) {}
+            },
+
+            verifyProduct: async (id, status) => {
+                if (status === 'rejected') await deleteDoc(doc(db, PATH_PRODUCTS, id));
+                else await updateDoc(doc(db, PATH_PRODUCTS, id), { status });
+                app.loadAdminData();
+            },
+
+            deleteOrder: async (id) => {
+                await deleteDoc(doc(db, PATH_ORDERS, id));
+                app.loadAdminData();
+            },
+
+            addToCart: (id) => {
+                const p = window.appState.products.find(x => x.id === id);
+                const exist = window.appState.cart.find(c => c.id === id);
+                if (exist) exist.qty++;
+                else window.appState.cart.push({ ...p, qty: 1 });
+                app.showToast(`${p.itemName} ditambahkan!`);
+                app.updateCartCount();
+            },
+
+            updateCartCount: () => {
+                const b = document.getElementById('cart-count');
+                const c = window.appState.cart.reduce((s, i) => s + i.qty, 0);
+                b.innerText = c; b.classList.toggle('hidden', c === 0);
+            },
+
+            renderCart: () => {
+                const cont = document.getElementById('cart-items');
+                const summ = document.getElementById('cart-summary');
+                if (!window.appState.cart.length) { 
+                    cont.innerHTML = '<p class="text-center opacity-30 py-10 uppercase font-bold">Keranjang Kosong...</p>'; 
+                    summ.classList.add('hidden'); 
+                    return; 
+                }
+                summ.classList.remove('hidden'); 
+                cont.innerHTML = '';
+                let total = 0;
+                window.appState.cart.forEach((item, idx) => {
+                    total += item.itemPrice * item.qty;
+                    cont.innerHTML += `
+                        <div class="neo-box p-3 flex gap-4 items-center bg-white">
+                            <div class="flex-grow">
+                                <p class="font-black text-xs uppercase">${item.itemName}</p>
+                                <p class="text-[9px] opacity-60">Seller: ${item.sellerName}</p>
+                                <p class="text-[10px] font-bold">Rp${item.itemPrice.toLocaleString()} x ${item.qty}</p>
+                            </div>
+                            <button onclick="app.removeFromCart(${idx})" class="text-neo-pink"><i class="fa-solid fa-trash"></i></button>
+                        </div>`;
+                });
+                document.getElementById('cart-total').innerText = 'Rp' + total.toLocaleString();
+            },
+
+            removeFromCart: (idx) => { window.appState.cart.splice(idx, 1); app.updateCartCount(); app.renderCart(); },
+
+            handleCheckout: async (e) => {
+                e.preventDefault();
+                const f = e.target;
+                const data = {
+                    buyerName: f.buyerName.value, buyerClass: f.buyerClass.value, buyerWa: f.buyerWa.value,
+                    codLocation: f.codLocation.value, customLoc: f.customLoc.value,
+                    codTimeMode: f.codTimeMode.value, customTime: f.customTime.value,
+                    items: window.appState.cart, totalPrice: window.appState.cart.reduce((s,i) => s+(i.itemPrice*i.qty), 0),
+                    createdAt: new Date().toISOString()
+                };
+                try {
+                    await addDoc(collection(db, PATH_ORDERS), data);
+                    window.appState.cart = []; app.updateCartCount();
+                    app.showToast("Order Berhasil!");
+                    app.router('home');
+                } catch (e) { alert("Gagal!"); }
+            },
+
+            checkAdmin: () => { 
+                if (document.getElementById('admin-pass').value === 'admin123') app.router('admin'); 
+                else alert("Password Salah!"); 
+            }
+        };
+
+        init();
+        window.app = app;
+    </script>
+</body>
+</html>
